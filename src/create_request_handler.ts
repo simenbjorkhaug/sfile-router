@@ -40,7 +40,8 @@ export const createRequestHandler = function<T extends typeof routes>(_routes: T
     }
 
     return new Response('Not found', { status: 404 })
-  }.bind(null, routes) as (request: Request) => Promise<Response> | Response
+  // deno-lint-ignore no-explicit-any
+  }.bind(null, routes) as <T = any>(request: Request, context: T) => Promise<Response> | Response
 
 // deno-lint-ignore no-explicit-any
 export type RequestHandlerArgs<T = Map<string, string>, C = any> = { request: Request, params: T, context: C }

@@ -1,0 +1,33 @@
+name: Publish to GitHub Package Registry
+
+on:
+  push:
+    tags:
+      - "*"
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out the code
+        uses: actions/checkout@v4
+
+      - name: Setup deno
+        uses: denoland/setup-deno@v1
+        with:
+          deno-version: vx.x.x
+
+      - name: Setup node
+        uses: actions/setup-node@v3
+        with:
+          node-version: 21.x.x
+          registry-url: 'https://registry.npmjs.org/'
+
+      - name: Build npm package from deno
+        run: deno run -A ./build.ts ${{ github.ref_name }}
+
+      - name: Publish to npm
+        run: npm publish
+        working-directory: ./npm
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}

@@ -10,7 +10,8 @@ export class NotFoundError extends Error {}
 
 export class MethodNotAllowedError extends Error {}
 
-export const createRequestHandler = function<T extends typeof routes>(_routes: T, request: Request, context = {}) {
+// deno-lint-ignore no-explicit-any
+export const createRequestHandler = function<T extends typeof routes, C = any>(_routes: T, request: Request, context?: C) {
     const url = new URL(request.url)
   
     const path = url.pathname
@@ -24,7 +25,7 @@ export const createRequestHandler = function<T extends typeof routes>(_routes: T
         if (methods.has(method)) {
           const { handler } = methods.get(method)!
   
-          return handler({ request, params, context })
+          return handler({ request, params, context: context ?? {} })
         }
   
         if (Config.shouldThrow) {
@@ -41,7 +42,7 @@ export const createRequestHandler = function<T extends typeof routes>(_routes: T
 
     return new Response('Not found', { status: 404 })
   // deno-lint-ignore no-explicit-any
-  }.bind(null, routes) as <T = any>(request: Request, context: T) => Promise<Response> | Response
+  }.bind(null, routes) as <T = any>(request: Request, context?: T) => Promise<Response> | Response
 
 // deno-lint-ignore no-explicit-any
 export type RequestHandlerArgs<T = Map<string, string>, C = any> = { request: Request, params: T, context: C }

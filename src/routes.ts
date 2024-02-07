@@ -17,6 +17,7 @@ export const routes: [string, Map<Methods, { handler: Handler }>][] = []
 
 export const Config = {
   shouldThrow: false,
+  ignore: ['.service', '.test'] as string[],
 }
 
 export async function configureRoutes({
@@ -58,19 +59,33 @@ export async function configureRoutes({
     Object.assign(Config, config)
   }
 
-  for await (const file of expandGlob(`${directory}/*.ts`)) {
+  outerLoop: for await (const file of expandGlob(`${directory}/**/*.ts`, {
+    followSymlinks: false,
+  })) {
     const fileContents = await import(file.path)
 
     const [, file_path] = file.path.split('routes')
 
+    if (Array.isArray(Config.ignore)) {
+      for (const ignore of Config.ignore) {
+        if (file_path.includes(ignore)) {
+          continue outerLoop
+        }
+      }
+    }
+
     let router_path = `/${file_path
-      .replace(/^\//, '') // replacing leading slash from file_path
+      .replace(/^\/+/, '') // replacing leading slash from file_path
+      .replace(/(index)/i, 'REPLACED_INDEX')
       .replace(/^_[^\.]*\./, '') // allow for grouping routes
       .replace(/^\./, '') // remove leading dot
       .replace(/\(\.\)/g, 'ESCAPED_DOT') // temporarily replace dots in parentheses
       .replace('.ts', '') // replace extension
       .replace(/\./g, '/') // replace dots with slashes
       .replace(/ESCAPED_DOT/g, '.') // put dots in parentheses back in
+      .replace(/REPLACED_INDEX/, '')
+      .replace(/^\/+/, '') // replacing leading slash from file_path
+      .replace(/\/+$/, '') // replacing trailing slash from file_path
       .replace(/\[(.*?)\]/g, ':$1')}` // replace square brackets with colons
 
     if (router_path === '/index') {
@@ -101,4 +116,6 @@ export async function configureRoutes({
   })
 
   routes.push(...sorted)
+
+  console.log(routes)
 }

@@ -23,7 +23,7 @@ export const Config = {
 export async function configureRoutes({
   directory = './routes',
   config,
-}: { directory?: string; config?: typeof Config } = {}) {
+}: { directory?: string; config?: Partial<typeof Config> } = {}) {
   const _routes = new Map<
     string,
     Map<

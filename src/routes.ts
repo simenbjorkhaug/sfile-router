@@ -17,7 +17,7 @@ export const routes: [string, Map<Methods, { handler: Handler }>][] = []
 
 export const Config = {
   shouldThrow: false,
-  ignore: ['.service', '.test'] as string[],
+  ignore: [] as string[],
 }
 
 export async function configureRoutes({

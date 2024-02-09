@@ -116,6 +116,4 @@ export async function configureRoutes({
   })
 
   routes.push(...sorted)
-
-  console.log(routes)
 }
